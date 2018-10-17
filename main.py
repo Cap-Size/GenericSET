@@ -16,8 +16,15 @@ def pullSite(url):
     returnList = []
     pulledSite = subprocess.check_output(['curl','url'])
     returnList.append(url)
-    returnList.append(pulledSite)
+    returnList.append(sanitizer(pulledSite))
     return returnList
+
+#This fixes the issues with python string manipulation and quotation marks and apostrophes
+def sanitizer(unsatitizedCode):
+    unsatitizedCode.replace('"','`')
+    unsatitizedCode.replace("'",'`')
+    return unsatitizedCode
+
 
 def fixHeaders(urlInfo):
     startAt = urlInfo[1].find('<head>')
@@ -33,10 +40,12 @@ def fixHeaders(urlInfo):
 
     def replaceHref(url, reference):
         theLength = len(reference)
-        startAt = reference.find("href='")
+        startAt = reference.find("href=`") + 6
         #This will fix the issue with finding the reference point(index) of the stoping point 
         fixPoint = 0
-        endAt = reference[startAt:]
+        endAt = reference[startAt:].find('`')
+        endResult = reference[:startAt] + url + reference[startAt + endAt:]
+        return endResult
 
 def inter():
     ask = rawInput("Welcome to PullSite, a generic version of REDACTED.\n\nWe can pull a site and let you host the given site.\n\nSelect the options (the number) below:\n1. Pull Site and reconnect the header links.\n2. Give list of header links.\n3. Quit")
